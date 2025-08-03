@@ -110,6 +110,20 @@ class CPU:
             self.V[X] = self.V[X] | self.V[Y]
             self.PC += 2
 
+        elif ((opcode & 0xF000) >> 12 == 8) and  (opcode & 0x000F) == 0x2:
+            # 0x8XY2
+            X = (opcode & 0x0f00) >> 8
+            Y = (opcode & 0x00f0) >> 4
+            self.V[X] = self.V[X] & self.V[Y]
+            self.PC += 2
+
+        elif ((opcode & 0xF000) >> 12 == 8) and  (opcode & 0x000F) == 0x3:
+            # 0x8XY2
+            X = (opcode & 0x0f00) >> 8
+            Y = (opcode & 0x00f0) >> 4
+            self.V[X] = self.V[X] ^ self.V[Y]
+            self.PC += 2
+
 
 
 
