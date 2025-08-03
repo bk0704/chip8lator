@@ -118,11 +118,46 @@ class CPU:
             self.PC += 2
 
         elif ((opcode & 0xF000) >> 12 == 8) and  (opcode & 0x000F) == 0x3:
-            # 0x8XY2
+            # 0x8XY3
             X = (opcode & 0x0f00) >> 8
             Y = (opcode & 0x00f0) >> 4
             self.V[X] = self.V[X] ^ self.V[Y]
             self.PC += 2
+
+        elif ((opcode & 0xF000) >> 12 == 8) and  (opcode & 0x000F) == 0x4:
+            # 0x8XY4
+            X = (opcode & 0x0f00) >> 8
+            Y = (opcode & 0x00f0) >> 4
+            self.V[X] += self.V[Y]
+            if self.V[X] > 0xFF:
+                self.V[15] = 1
+            self.PC += 2
+
+        elif ((opcode & 0xF000) >> 12 == 8) and  (opcode & 0x000F) == 0x5:
+            # 0x8XY5
+            X = (opcode & 0x0f00) >> 8
+            Y = (opcode & 0x00f0) >> 4
+            if self.V[X] >= self.V[Y]:
+                self.V[15] = 1
+            else:
+                self.V[15] = 0
+            self.V[X] -= self.V[Y]
+            self.PC += 2
+
+        elif ((opcode & 0xF000) >> 12 == 8) and  (opcode & 0x000F) == 0x7:
+            # 0x8XY7
+            X = (opcode & 0x0f00) >> 8
+            Y = (opcode & 0x00f0) >> 4
+            if self.V[Y] >= self.V[X]:
+                self.V[15] = 1
+            else:
+                self.V[15] = 0
+            self.V[X] = self.V[Y] - self.V[X]
+            self.PC += 2
+
+
+
+
 
 
 
