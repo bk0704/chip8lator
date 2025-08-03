@@ -50,7 +50,7 @@ class CPU:
 
 
         elif (opcode & 0xF000) >> 12 == 3:
-            # 3XNN
+            # 0x3XNN
             X = (opcode & 0x0f00) >> 8
             NN = opcode & 0x00ff
             if self.V[X] == NN:
@@ -59,10 +59,19 @@ class CPU:
                 self.PC += 2
 
         elif (opcode & 0xF000) >> 12 == 4:
-            # 4XNN
+            # 0x4XNN
             X = (opcode & 0x0f00) >> 8
             NN = opcode & 0x00ff
             if self.V[X] != NN:
+                self.PC += 4
+            else:
+                self.PC += 2
+
+        elif (opcode & 0xF000) >> 12 == 5:
+            # 0x5XY0
+            X = (opcode & 0x0f00) >> 8
+            Y = (opcode & 0x00f0) >> 4
+            if self.V[X] == self.V[Y]:
                 self.PC += 4
             else:
                 self.PC += 2
