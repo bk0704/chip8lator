@@ -2,10 +2,10 @@ import cpu
 
 chip = cpu.CPU()
 
-chip.V[3] = 10
+chip.V[2] = 0x10
 
-chip.memory[0x200] = 0x12
-chip.memory[0x201] = 0x34
+chip.memory[0x200] = 0x42
+chip.memory[0x201] = 0x12
 
 opcode = chip.fetch_opcode()
 

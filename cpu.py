@@ -23,29 +23,50 @@ class CPU:
         return opcode
 
     def decode_and_execute(self, opcode):
+
         if (opcode & 0xF000) >> 12 == 6:
+            # 0x6XNN
             X = (opcode & 0x0F00) >> 8
             NN = opcode & 0x00FF
             self.V[X] = NN
             self.PC += 2
         elif (opcode & 0xF000) >> 12 == 7:
+            # 0x7XNN
             X = (opcode & 0x0F00) >> 8
             NN = opcode & 0x00FF
             self.V[X] += NN
             self.PC += 2
 
-        elif (opcode & 0xF000) >> 12 == 10:
+        elif (opcode & 0xF000) >> 12 == 0xA:
+            # 0xANNN
             NNN = opcode & 0x0FFF
             self.i = NNN
             self.PC += 2
 
         elif (opcode & 0xF000) >> 12 == 1:
+            # 0x1NNN
             NNN = opcode & 0x0FFF
             self.PC = NNN
 
+
         elif (opcode & 0xF000) >> 12 == 3:
+            # 3XNN
             X = (opcode & 0x0f00) >> 8
             NN = opcode & 0x00ff
+            if self.V[X] == NN:
+                self.PC += 4
+            else:
+                self.PC += 2
+
+        elif (opcode & 0xF000) >> 12 == 4:
+            # 4XNN
+            X = (opcode & 0x0f00) >> 8
+            NN = opcode & 0x00ff
+            if self.V[X] != NN:
+                self.PC += 4
+            else:
+                self.PC += 2
+
 
 
 
