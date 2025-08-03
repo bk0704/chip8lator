@@ -85,6 +85,19 @@ class CPU:
             else:
                 self.PC += 2
 
+        elif (opcode & 0xF000) >> 12 == 2:
+            # 0x2NNN
+            NNN = opcode & 0x0FFF
+            self.stack.append(self.PC)
+            self.PC = NNN
+
+        elif opcode == 0x00EE:
+            popped_value = self.stack[-1]
+            self.stack.pop(-1)
+            self.PC = popped_value + 2
+
+
+
 
 
 
