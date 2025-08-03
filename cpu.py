@@ -8,6 +8,7 @@ class CPU:
         self.stackPointer = 0
         self.delay = 0
         self.sound = 0
+        self.display = [[0] * 64 for _ in range(32)]
 
     def fetch_opcode(self):
         #Get the first byte from the memory,
@@ -47,7 +48,6 @@ class CPU:
             # 0x1NNN
             NNN = opcode & 0x0FFF
             self.PC = NNN
-
 
         elif (opcode & 0xF000) >> 12 == 3:
             # 0x3XNN
@@ -165,6 +165,12 @@ class CPU:
             X = (opcode & 0x0f00) >> 8
             self.V[15] = (self.V[X] & 0x80) >> 7
             self.V[X] = (self.V[X] << 1) & 0xFF
+            self.PC += 2
+
+        elif opcode == 00E0:
+            for y in range(32):
+                for x in range(64):
+                    self.display[y][x] = 0
             self.PC += 2
 
 
