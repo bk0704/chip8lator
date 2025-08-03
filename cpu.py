@@ -96,6 +96,20 @@ class CPU:
             self.stack.pop(-1)
             self.PC = popped_value + 2
 
+        elif ((opcode & 0xF000) >> 12 == 8) and  (opcode & 0x000F) == 0x0:
+            # 0x8XY0
+            X = (opcode & 0x0f00) >> 8
+            Y = (opcode & 0x00f0) >> 4
+            self.V[X] = self.V[Y]
+            self.PC += 2
+
+        elif ((opcode & 0xF000) >> 12 == 8) and  (opcode & 0x000F) == 0x1:
+            # 0x8XY1
+            X = (opcode & 0x0f00) >> 8
+            Y = (opcode & 0x00f0) >> 4
+            self.V[X] = self.V[X] | self.V[Y]
+            self.PC += 2
+
 
 
 

@@ -2,24 +2,15 @@ import cpu
 
 chip = cpu.CPU()
 
-chip.V[2] = 15
-chip.V[3] = 15
+chip.V[2] = 0xA0
+chip.V[3] = 0x55
 
-chip.memory[0x200] = 0x24
-chip.memory[0x201] = 0x50
-
-opcode = chip.fetch_opcode()
-
-chip.decode_and_execute(opcode)
-
-print("PC = ", hex(chip.PC))
-print("Stack[-1] = ", hex(chip.stack[-1]))
-
-chip.memory[0x450] = 0x00
-chip.memory[0x451] = 0xEE
+chip.memory[0x200] = 0x82
+chip.memory[0x201] = 0x31
 
 opcode = chip.fetch_opcode()
 
 chip.decode_and_execute(opcode)
 
-print("PC = ", hex(chip.PC))
+print("V[2] = ", chip.V[2])
+print("V[3] = ", chip.V[3])
