@@ -76,6 +76,15 @@ class CPU:
             else:
                 self.PC += 2
 
+        elif (opcode & 0xF000) >> 12 == 9:
+            # 0x9XY0
+            X = (opcode & 0x0f00) >> 8
+            Y = (opcode & 0x00f0) >> 4
+            if self.V[X] != self.V[Y]:
+                self.PC += 4
+            else:
+                self.PC += 2
+
 
 
 
