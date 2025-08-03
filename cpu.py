@@ -155,6 +155,19 @@ class CPU:
             self.V[X] = self.V[Y] - self.V[X]
             self.PC += 2
 
+        elif ((opcode & 0xF000) >> 12 == 8) and (opcode & 0x000F) == 0x6:
+            X = (opcode & 0x0f00) >> 8
+            self.V[15] = self.V[X] & 0x1
+            self.V[X] = self.V[X] >> 1
+            self.PC += 2
+
+        elif ((opcode & 0xF000) >> 12 == 8) and (opcode & 0x000F) == 0xE:
+            X = (opcode & 0x0f00) >> 8
+            self.V[15] = (self.V[X] & 0x80) >> 7
+            self.V[X] = (self.V[X] << 1) & 0xFF
+            self.PC += 2
+
+
 
 
 
