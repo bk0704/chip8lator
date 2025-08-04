@@ -168,10 +168,38 @@ class CPU:
             self.PC += 2
 
         elif opcode == 00E0:
+            # Clear
             for y in range(32):
                 for x in range(64):
                     self.display[y][x] = 0
             self.PC += 2
+
+        elif (opcode & 0xF000) >> 12 == 0xD:
+            X = (opcode & 0x0f00) >> 8
+            Y = (opcode & 0x00f0) >> 4
+            N = opcode & 0x000f
+            x_coordinate = self.V[X]
+            y_coordinate = self.V[Y]
+            height = N
+            self.V[0xf] = 0 # set collision flag to zero
+            for row in range(N):
+                sprite_byte = self.memory[self.i + row] # Read one byte from memory for row of the sprite
+                print(f"Row {row} sprite byte: {bin(sprite_byte)}")
+                for bit in range(8):
+                    pixel = (sprite_byte >> (7 - bit)) & 1 # Extract the bit at position 7 - bit
+                    # Calculate the actual screen position for this pixel, and wrap around if it goes off-screen.
+                    x = (x_coordinate + bit) % 64
+                    y = (y_coordinate + row) % 32
+                    if pixel == 1: # only draw if sprite bit is 1
+                        if self.display[x][y] == 1: # if the pixel on screen is already on, set VF = 1
+                            self.V[0xF] = 1
+                        self.display[y][x] ^= 1 # toggle screen pixel using XOR
+                        print(f"Pixel at ({x}, {y}) = {pixel}")
+            self.PC += 2
+
+
+
+
 
 
 
