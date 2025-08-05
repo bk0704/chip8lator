@@ -9,6 +9,7 @@ class CPU:
         self.delay = 0
         self.sound = 0
         self.display = [[0] * 64 for _ in range(32)]
+        self.keys = [0] * 16
 
     def fetch_opcode(self):
         #Get the first byte from the memory,
@@ -196,6 +197,17 @@ class CPU:
                         self.display[y][x] ^= 1 # toggle screen pixel using XOR
                         print(f"Pixel at ({x}, {y}) = {pixel}")
             self.PC += 2
+
+        elif ((opcode & 0xf000) >> 12 == 0xE) and opcode & 0x00ff == 0x9E:
+            X = (opcode & 0x0f00) >> 8
+            if self.keys[self.V[X]] == 1:
+                self.PC += 2
+
+        elif ((opcode & 0xf000) >> 12 == 0xE) and opcode & 0x00ff == 0xA1:
+            X = (opcode & 0x0f00) >> 8
+            if self.keys[self.V[X]] != 1:
+                self.PC += 2
+
 
 
 
