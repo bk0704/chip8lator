@@ -231,6 +231,11 @@ class CPU:
             self.V[X] = random_byte & NN
             self.PC += 2
 
+        elif ((opcode & 0xf000) >> 12 == 0xF) and (opcode & 0x00ff) == 0x1E:
+            X = (opcode & 0x0f00) >> 8
+            self.i += self.V[X]
+            self.PC += 2
+
 
 
 

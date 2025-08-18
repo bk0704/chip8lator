@@ -273,6 +273,23 @@ def test_CXNN_random_mask():
     ok("CXNN random mask", all_masked and saw_variety,
        f"(masked={all_masked}, varied={saw_variety})")
 
+def test_FX1E_add_I():
+    c = fresh()
+    c.i = 0x300
+    c.V[4] = 0x10
+    # FX1E with X=4 -> 0xF41E
+    run_once(c, 0xF41E)
+    ok("FX1E add to I", (c.i == 0x310) and (c.PC == 0x202),
+       f"(I={hex(c.i)}, PC={hex(c.PC)})")
+
+    # check overflow edge case
+    c = fresh()
+    c.i = 0xFFF
+    c.V[1] = 0x01
+    run_once(c, 0xF11E)
+    ok("FX1E add to I overflow", (c.i == 0x1000) and (c.PC == 0x202),
+       f"(I={hex(c.i)}, PC={hex(c.PC)})")
+
 
 def run_all():
     print("Running CHIP-8 opcode tests...\n")
@@ -300,6 +317,7 @@ def run_all():
     test_FX15_set_delay()
     test_FX18_set_sound()
     test_CXNN_random_mask()
+    test_FX1E_add_I()
     print(f"\nDone. {PASS}/{TOTAL} tests passed.")
 
 if __name__ == "__main__":
