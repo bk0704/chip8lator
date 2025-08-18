@@ -168,7 +168,7 @@ class CPU:
             self.V[X] = (self.V[X] << 1) & 0xFF
             self.PC += 2
 
-        elif opcode == 00E0:
+        elif opcode == 0x00E0:
             # Clear
             for y in range(32):
                 for x in range(64):
@@ -201,12 +201,16 @@ class CPU:
         elif ((opcode & 0xf000) >> 12 == 0xE) and opcode & 0x00ff == 0x9E:
             X = (opcode & 0x0f00) >> 8
             if self.keys[self.V[X]] == 1:
-                self.PC += 2
+                self.PC += 4
+                return
+            self.PC += 2
 
         elif ((opcode & 0xf000) >> 12 == 0xE) and opcode & 0x00ff == 0xA1:
             X = (opcode & 0x0f00) >> 8
             if self.keys[self.V[X]] != 1:
-                self.PC += 2
+                self.PC += 4
+                return
+            self.PC += 2
 
 
 
