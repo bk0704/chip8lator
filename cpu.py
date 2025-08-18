@@ -1,3 +1,6 @@
+import random
+
+
 class CPU:
     def __init__(self):
         self.memory = [0] * 4096
@@ -32,11 +35,12 @@ class CPU:
             NN = opcode & 0x00FF
             self.V[X] = NN
             self.PC += 2
+
         elif (opcode & 0xF000) >> 12 == 7:
             # 0x7XNN
             X = (opcode & 0x0F00) >> 8
             NN = opcode & 0x00FF
-            self.V[X] += NN
+            self.V[X] = (self.V[X] + NN) & 0xFF
             self.PC += 2
 
         elif (opcode & 0xF000) >> 12 == 0xA:
@@ -68,14 +72,12 @@ class CPU:
             else:
                 self.PC += 2
 
-        elif (opcode & 0xF000) >> 12 == 5:
+
+        elif ((opcode & 0xF000) >> 12 == 5) and ((opcode & 0x000F) == 0):
             # 0x5XY0
             X = (opcode & 0x0f00) >> 8
             Y = (opcode & 0x00f0) >> 4
-            if self.V[X] == self.V[Y]:
-                self.PC += 4
-            else:
-                self.PC += 2
+            self.PC += 4 if self.V[X] == self.V[Y] else 2
 
         elif (opcode & 0xF000) >> 12 == 9:
             # 0x9XY0
@@ -129,37 +131,35 @@ class CPU:
             # 0x8XY4
             X = (opcode & 0x0f00) >> 8
             Y = (opcode & 0x00f0) >> 4
-            self.V[X] += self.V[Y]
-            if self.V[X] > 0xFF:
-                self.V[15] = 1
+            sum = self.V[X] + self.V[Y]
+            self.V[0xF] = 1 if sum > 0xFF else 0
+            self.V[X] = sum & 0xFF
             self.PC += 2
 
         elif ((opcode & 0xF000) >> 12 == 8) and  (opcode & 0x000F) == 0x5:
-            # 0x8XY5
-            X = (opcode & 0x0f00) >> 8
-            Y = (opcode & 0x00f0) >> 4
-            if self.V[X] >= self.V[Y]:
-                self.V[15] = 1
-            else:
-                self.V[15] = 0
-            self.V[X] -= self.V[Y]
+            # 0x8XY5  Vx = Vx - Vy ; VF = not borrow
+            X = (opcode & 0x0F00) >> 8
+            Y = (opcode & 0x00F0) >> 4
+            self.V[0xF] = 1 if self.V[X] >= self.V[Y] else 0
+            self.V[X] = (self.V[X] - self.V[Y]) & 0xFF
             self.PC += 2
+
 
         elif ((opcode & 0xF000) >> 12 == 8) and  (opcode & 0x000F) == 0x7:
             # 0x8XY7
             X = (opcode & 0x0f00) >> 8
             Y = (opcode & 0x00f0) >> 4
             if self.V[Y] >= self.V[X]:
-                self.V[15] = 1
+                self.V[0xF] = 1
             else:
-                self.V[15] = 0
-            self.V[X] = self.V[Y] - self.V[X]
+                self.V[0xF] = 0
+            self.V[X] = (self.V[Y] - self.V[X]) & 0xFF
             self.PC += 2
 
         elif ((opcode & 0xF000) >> 12 == 8) and (opcode & 0x000F) == 0x6:
             X = (opcode & 0x0f00) >> 8
             self.V[15] = self.V[X] & 0x1
-            self.V[X] = self.V[X] >> 1
+            self.V[X] = (self.V[X] >> 1) & 0xFF
             self.PC += 2
 
         elif ((opcode & 0xF000) >> 12 == 8) and (opcode & 0x000F) == 0xE:
@@ -181,21 +181,18 @@ class CPU:
             N = opcode & 0x000f
             x_coordinate = self.V[X]
             y_coordinate = self.V[Y]
-            height = N
             self.V[0xf] = 0 # set collision flag to zero
             for row in range(N):
                 sprite_byte = self.memory[self.i + row] # Read one byte from memory for row of the sprite
-                print(f"Row {row} sprite byte: {bin(sprite_byte)}")
                 for bit in range(8):
                     pixel = (sprite_byte >> (7 - bit)) & 1 # Extract the bit at position 7 - bit
                     # Calculate the actual screen position for this pixel, and wrap around if it goes off-screen.
                     x = (x_coordinate + bit) % 64
                     y = (y_coordinate + row) % 32
                     if pixel == 1: # only draw if sprite bit is 1
-                        if self.display[x][y] == 1: # if the pixel on screen is already on, set VF = 1
+                        if self.display[y][x] == 1: # if the pixel on screen is already on, set VF = 1
                             self.V[0xF] = 1
                         self.display[y][x] ^= 1 # toggle screen pixel using XOR
-                        print(f"Pixel at ({x}, {y}) = {pixel}")
             self.PC += 2
 
         elif ((opcode & 0xf000) >> 12 == 0xE) and opcode & 0x00ff == 0x9E:
@@ -211,6 +208,31 @@ class CPU:
                 self.PC += 4
                 return
             self.PC += 2
+
+        elif ((opcode & 0xf000) >> 12 == 0xF) and opcode & 0x00ff == 0x07:
+            X = (opcode & 0x0f00) >> 8
+            self.V[X] = self.delay
+            self.PC += 2
+
+        elif ((opcode & 0xf000) >> 12 == 0xF) and opcode & 0x00ff == 0x15:
+            X = (opcode & 0x0f00) >> 8
+            self.delay = self.V[X]
+            self.PC += 2
+
+        elif ((opcode & 0xf000) >> 12 == 0xF) and opcode & 0x00ff == 0x18:
+            X = (opcode & 0x0f00) >> 8
+            self.sound = self.V[X]
+            self.PC += 2
+
+        elif (opcode & 0xf000) >> 12 == 0xC:
+            X = (opcode & 0x0f00) >> 8
+            NN = opcode & 0x00ff
+            random_byte = random.getrandbits(8)
+            self.V[X] = random_byte & NN
+            self.PC += 2
+
+
+
 
 
 
